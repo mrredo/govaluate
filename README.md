@@ -153,7 +153,22 @@ Functions cannot be passed as parameters, they must be known at the time when th
 
 Accessors
 --
+Map limitations:
+ - Supports for now only the `map[string]interface{}` type
+To enforce unexported field names checking you can `true` to the last parameter(it will throw an error when accessing map fields with lowercase) `NewEvaluableExpressionWithFunctions` and `NewEvaluableExpression`
+```go
+govaluate.NewEvaluableExpressionWithFunctions(expression, map[string]govaluate.ExpressionFunction{}, false)
+govaluate.NewEvaluableExpression(expression, false)
 
+govaluate.NewEvaluableExpressionWithFunctions(expression, map[string]govaluate.ExpressionFunction{}, true)
+govaluate.NewEvaluableExpression(expression, true)
+```
+
+
+If you have maps in your parameters, you can access their field and methods like this:
+
+    "foo.Bar"
+    "foo.Bar.example"
 If you have structs in your parameters, you can access their fields and methods in the usual way. For instance, given a struct that has a method "Echo", present in the parameters as `foo`, the following is valid:
 
 	"foo.Echo('hello world')"
