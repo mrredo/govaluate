@@ -324,8 +324,17 @@ func makeAccessorStage(pair []string) evaluationOperator {
 				corePtrVal = coreValue
 				coreValue = coreValue.Elem()
 			}
-
-			if coreValue.Kind() != reflect.Struct {
+			if coreValue.Kind() == reflect.Map {
+				val, ok := value.(map[string]interface{})[pair[i]]
+				if !ok {
+					return nil, nil
+				}
+				if reflect.ValueOf(val).Kind() == reflect.Map {
+					value = val
+					continue
+				}
+				return value.(map[string]interface{})[pair[i]], nil
+			} else if coreValue.Kind() != reflect.Map && coreValue.Kind() != reflect.Struct {
 				return nil, errors.New("Unable to access '" + pair[i] + "', '" + pair[i-1] + "' is not a struct")
 			}
 
@@ -467,8 +476,8 @@ func isFloat64(value interface{}) bool {
 }
 
 /*
-	Addition usually means between numbers, but can also mean string concat.
-	String concat needs one (or both) of the sides to be a string.
+Addition usually means between numbers, but can also mean string concat.
+String concat needs one (or both) of the sides to be a string.
 */
 func additionTypeCheck(left interface{}, right interface{}) bool {
 
@@ -482,8 +491,8 @@ func additionTypeCheck(left interface{}, right interface{}) bool {
 }
 
 /*
-	Comparison can either be between numbers, or lexicographic between two strings,
-	but never between the two.
+Comparison can either be between numbers, or lexicographic between two strings,
+but never between the two.
 */
 func comparatorTypeCheck(left interface{}, right interface{}) bool {
 
@@ -505,8 +514,8 @@ func isArray(value interface{}) bool {
 }
 
 /*
-	Converting a boolean to an interface{} requires an allocation.
-	We can use interned bools to avoid this cost.
+Converting a boolean to an interface{} requires an allocation.
+We can use interned bools to avoid this cost.
 */
 func boolIface(b bool) interface{} {
 	if b {

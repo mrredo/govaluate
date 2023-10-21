@@ -11,7 +11,7 @@ import (
 	"unicode"
 )
 
-func parseTokens(expression string, functions map[string]ExpressionFunction) ([]ExpressionToken, error) {
+func parseTokens(expression string, functions map[string]ExpressionFunction, checkForUnexported ...bool) ([]ExpressionToken, error) {
 
 	var ret []ExpressionToken
 	var token ExpressionToken
@@ -25,7 +25,7 @@ func parseTokens(expression string, functions map[string]ExpressionFunction) ([]
 
 	for stream.canRead() {
 
-		token, err, found = readToken(stream, state, functions)
+		token, err, found = readToken(stream, state, functions, checkForUnexported...)
 
 		if err != nil {
 			return ret, err
@@ -52,7 +52,7 @@ func parseTokens(expression string, functions map[string]ExpressionFunction) ([]
 	return ret, nil
 }
 
-func readToken(stream *lexerStream, state lexerState, functions map[string]ExpressionFunction) (ExpressionToken, error, bool) {
+func readToken(stream *lexerStream, state lexerState, functions map[string]ExpressionFunction, checkForUnexported ...bool) (ExpressionToken, error, bool) {
 
 	var function ExpressionFunction
 	var ret ExpressionToken
@@ -188,17 +188,21 @@ func readToken(stream *lexerStream, state lexerState, functions map[string]Expre
 				kind = ACCESSOR
 				splits := strings.Split(tokenString, ".")
 				tokenValue = splits
+				if len(checkForUnexported) != 0 {
+					if checkForUnexported[0] == true {
+						// check that none of them are unexported
+						for i := 1; i < len(splits); i++ {
 
-				// check that none of them are unexported
-				for i := 1; i < len(splits); i++ {
+							firstCharacter := getFirstRune(splits[i])
 
-					firstCharacter := getFirstRune(splits[i])
-
-					if unicode.ToUpper(firstCharacter) != firstCharacter {
-						errorMsg := fmt.Sprintf("Unable to access unexported field '%s' in token '%s'", splits[i], tokenString)
-						return ExpressionToken{}, errors.New(errorMsg), false
+							if unicode.ToUpper(firstCharacter) != firstCharacter {
+								errorMsg := fmt.Sprintf("Unable to access unexported field '%s' in token '%s'", splits[i], tokenString)
+								return ExpressionToken{}, errors.New(errorMsg), false
+							}
+						}
 					}
 				}
+
 			}
 			break
 		}
@@ -298,8 +302,8 @@ func readTokenUntilFalse(stream *lexerStream, condition func(rune) bool) string 
 }
 
 /*
-	Returns the string that was read until the given [condition] was false, or whitespace was broken.
-	Returns false if the stream ended before whitespace was broken or condition was met.
+Returns the string that was read until the given [condition] was false, or whitespace was broken.
+Returns false if the stream ended before whitespace was broken or condition was met.
 */
 func readUntilFalse(stream *lexerStream, includeWhitespace bool, breakWhitespace bool, allowEscaping bool, condition func(rune) bool) (string, bool) {
 
@@ -345,8 +349,8 @@ func readUntilFalse(stream *lexerStream, includeWhitespace bool, breakWhitespace
 }
 
 /*
-	Checks to see if any optimizations can be performed on the given [tokens], which form a complete, valid expression.
-	The returns slice will represent the optimized (or unmodified) list of tokens to use.
+Checks to see if any optimizations can be performed on the given [tokens], which form a complete, valid expression.
+The returns slice will represent the optimized (or unmodified) list of tokens to use.
 */
 func optimizeTokens(tokens []ExpressionToken) ([]ExpressionToken, error) {
 
@@ -385,7 +389,7 @@ func optimizeTokens(tokens []ExpressionToken) ([]ExpressionToken, error) {
 }
 
 /*
-	Checks the balance of tokens which have multiple parts, such as parenthesis.
+Checks the balance of tokens which have multiple parts, such as parenthesis.
 */
 func checkBalance(tokens []ExpressionToken) error {
 
@@ -466,9 +470,9 @@ func isNotClosingBracket(character rune) bool {
 }
 
 /*
-	Attempts to parse the [candidate] as a Time.
-	Tries a series of standardized date formats, returns the Time if one applies,
-	otherwise returns false through the second return.
+Attempts to parse the [candidate] as a Time.
+Tries a series of standardized date formats, returns the Time if one applies,
+otherwise returns false through the second return.
 */
 func tryParseTime(candidate string) (time.Time, bool) {
 
