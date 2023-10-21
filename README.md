@@ -180,6 +180,8 @@ parameters := map[string]interface{}{
 you can use this in the expression like this
 
     "foo.Bar.value >= foo.bar"
+
+If a field doesnt exist it will return nil value.
     
 If you have structs in your parameters, you can access their fields and methods in the usual way. For instance, given a struct that has a method "Echo", present in the parameters as `foo`, the following is valid:
 
