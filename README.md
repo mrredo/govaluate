@@ -166,9 +166,23 @@ govaluate.NewEvaluableExpression(expression, true)
 
 
 If you have maps in your parameters, you can access their field and methods like this:
+    
+```go
+parameters := map[string]interface{}{
+		"foo": map[string]interface{}{
+    			"Bar": map[string]interface{}{
+     				"value": 1000,
+			},
+ 			"bar": 1000,
+    		},
+	}
+```
+you can use this in the expression like this
 
-    "foo.Bar"
-    "foo.Bar.example"
+    "foo.Bar.value >= foo.bar"
+
+If a field doesnt exist it will return nil value.
+    
 If you have structs in your parameters, you can access their fields and methods in the usual way. For instance, given a struct that has a method "Echo", present in the parameters as `foo`, the following is valid:
 
 	"foo.Echo('hello world')"
