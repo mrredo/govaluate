@@ -332,8 +332,9 @@ func makeAccessorStage(pair []string) evaluationOperator {
 					value = val
 					continue
 				}
+				value = value.(map[string]interface{})[pair[i]]
 				value = castToFloat64(value)
-				return value.(map[string]interface{})[pair[i]], nil
+				return value, nil
 			} else if coreValue.Kind() != reflect.Map && coreValue.Kind() != reflect.Struct {
 				return nil, errors.New("Unable to access '" + pair[i] + "', '" + pair[i-1] + "' is not a struct")
 			}
