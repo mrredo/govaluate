@@ -159,7 +159,6 @@ func (this EvaluableExpression) Eval(parameters Parameters) (interface{}, error)
 	} else {
 		parameters = DUMMY_PARAMETERS
 	}
-	fmt.Println(this.tokens)
 	return this.evaluateStage(this.evaluationStages, parameters)
 }
 
