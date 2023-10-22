@@ -48,7 +48,6 @@ func parseTokens(expression string, functions map[string]ExpressionFunction, che
 	if err != nil {
 		return nil, err
 	}
-
 	return ret, nil
 }
 

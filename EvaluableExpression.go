@@ -159,6 +159,7 @@ func (this EvaluableExpression) Eval(parameters Parameters) (interface{}, error)
 	} else {
 		parameters = DUMMY_PARAMETERS
 	}
+	fmt.Println(this.evaluationStages.leftStage, this.evaluationStages.rightStage)
 	return this.evaluateStage(this.evaluationStages, parameters)
 }
 
@@ -226,7 +227,9 @@ func (this EvaluableExpression) evaluateStage(stage *evaluationStage, parameters
 			}
 		}
 	}
-
+	g, e := stage.operator(left, right, parameters)
+	fmt.Println(g)
+	fmt.Println(e)
 	return stage.operator(left, right, parameters)
 }
 

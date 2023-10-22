@@ -92,7 +92,6 @@ func addStage(left interface{}, right interface{}, parameters Parameters) (inter
 	if isString(left) || isString(right) {
 		return fmt.Sprintf("%v%v", left, right), nil
 	}
-
 	return left.(float64) + right.(float64), nil
 }
 func subtractStage(left interface{}, right interface{}, parameters Parameters) (interface{}, error) {
@@ -333,6 +332,7 @@ func makeAccessorStage(pair []string) evaluationOperator {
 					value = val
 					continue
 				}
+				value = castToFloat64(value)
 				return value.(map[string]interface{})[pair[i]], nil
 			} else if coreValue.Kind() != reflect.Map && coreValue.Kind() != reflect.Struct {
 				return nil, errors.New("Unable to access '" + pair[i] + "', '" + pair[i-1] + "' is not a struct")
